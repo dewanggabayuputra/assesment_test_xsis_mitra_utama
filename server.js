@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
+const movieRouter = require("./app/routes/movie.routes")
 const app = express();
 
 var corsOptions = {
@@ -26,19 +26,20 @@ db.sequelize.sync()
   });
 
 // // drop the table if it already exists
-db.sequelize.sync({ force: true }).then(() => {
-  console.log("Drop and re-sync db.");
-});
+// db.sequelize.sync({ force: true }).then(() => {
+//   console.log("Drop and re-sync db.");
+// });
 
 // simple route
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
 
-require("./app/routes/movie.routes")(app);
+app.use('/api/movies', movieRouter);
+// require("./app/routes/movie.routes")
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
+module.exports = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });

@@ -1,4 +1,4 @@
-module.exports = app => {
+// module.exports = app => {
   const movies = require("../controllers/movie.controller.js");
 
   var router = require("express").Router();
@@ -18,5 +18,4 @@ module.exports = app => {
   // Delete a Movie with id
   router.delete("/:id", movies.delete);
 
-  app.use('/api/movies', router);
-};
+  module.exports = router;

@@ -1,6 +1,7 @@
 const db = require("../models");
 const Movie = db.movies;
 let Validator = require('validatorjs');
+const movieDummy = require('../dummy');
 
 let rules = {
   id: "required|integer",
@@ -24,9 +25,8 @@ function validationCheck (payload, rules) {
 } 
 
 exports.create = async (req, res) => {
-  // Validate request
   let validation = validationCheck(req.body, rules);
-  console.log(req.body)
+
   const movie = {
     id: req.body.id,
     title: req.body.title,
@@ -42,16 +42,16 @@ exports.create = async (req, res) => {
     for (const key in rules) {
       validationObj[`${key}`] = validation.errors.get(`${key}`)
     }
+
     res.status(412)
       .send({
-          success: false,
           message: 'Validation failed',
           validation_message: validationObj
       });
   } else {
     Movie.create(movie)
       .then(data => {
-        res.send({
+        res.status(200).send({
           data : data,
           message : "Movie was successfully created"
         })
@@ -66,10 +66,12 @@ exports.create = async (req, res) => {
 };
 
 exports.findAll = (req, res) => {
-
   Movie.findAll({})
     .then(data => {
-      res.send(data);
+        res.status(200).json({
+          data : data,
+          message : "All movie successfully retreived"
+        })
     })
     .catch(err => {
       res.status(500).send({
@@ -85,10 +87,14 @@ exports.findOne = (req, res) => {
   Movie.findByPk(id)
     .then(data => {
       if (data) {
-        res.send(data);
+        res.status(200)
+        .send({
+          data: data,
+          message : `Movie with id ${id} successfully found`
+        });
       } else {
         res.status(404).send({
-          message: `Cannot find Movie with id=${id}.`
+          message: `Cannot find Movie with id=${id} because not found.`
         });
       }
     })
@@ -110,7 +116,6 @@ exports.update = (req, res) => {
     }
     res.status(412)
       .send({
-          success: false,
           message: 'Validation failed',
           validation_message: validationObj
       });
@@ -120,12 +125,14 @@ exports.update = (req, res) => {
     })
       .then(num => {
         if (num == 1) {
-          res.send({
-            message : "Movie was successfully updated"
+          res.status(200)
+          .send({
+            message : `Movie with id=${id} was successfully updated`
           });
         } else {
-          res.send({
-            message: `Cannot update Movie with id=${id}. Maybe Movie was not found or req.body is empty!`
+          res.status(404)
+          .send({
+            message: `Cannot update Movie with id=${id} because not found.`
           });
         }
       })
@@ -145,18 +152,20 @@ exports.delete = (req, res) => {
   })
     .then(num => {
       if (num == 1) {
-        res.send({
-          message: "Movie was deleted successfully!"
+        res.status(200)
+        .send({
+          message: `Movie with id=${id} was successfully deleted!`
         });
       } else {
-        res.send({
-          message: `Cannot delete Movie with id=${id}. Maybe Movie was not found!`
+        res.status(404)
+        .send({
+          message: `Cannot delete Movie with id=${id} because not found.`
         });
       }
     })
     .catch(err => {
       res.status(500).send({
-        message: "Could not delete Movie with id=" + id
+        message: "Error delete Movie with id=" + id
       });
     });
 };
